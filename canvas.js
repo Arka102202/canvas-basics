@@ -6,31 +6,91 @@ window.addEventListener("load", () => {
 
     const canvasEl = document.getElementById("my-canvas");
 
-    canvasEl.width = window.innerWidth - (4 * window.innerWidth / 100) - 4;
-    canvasEl.height = window.innerHeight - (4 * window.innerWidth / 100) - 4;
-
-    let canvas = canvasEl.getBoundingClientRect();
+    let canvas = setNStoreCanvasSize(canvasEl);
 
     window.addEventListener("resize", () => {
-        canvasEl.width = window.innerWidth - (4 * window.innerWidth / 100) - 4;
-        canvasEl.height = window.innerHeight - (4 * window.innerWidth / 100) - 4;
-
-        canvas = canvasEl.getBoundingClientRect();
+        canvas = setNStoreCanvasSize(canvasEl);
     });
     const ctx = canvasEl.getContext("2d");
 
-    const circle = new Circle({ x: 200, y: 200 }, 20, { x: 1, y: 2 });
+    const circles = [];
 
-    circle.draw(ctx);
+    const genCircle = (e, ctx) => {
+        console.log({ x: e.offsetX, y: e.offsetY })
+        const circle = new Circle({ x: e.offsetX, y: e.offsetY }, 2, { x: 0, y: 0 }, "#123456", "#12345600", true);
 
-    console.log(canvas);
+        circles.push(circle);
 
-    const animate = () => {
-        requestAnimationFrame(animate);
-
-        circle.update(ctx, canvas);
     }
 
-    animate();
+    let isDrawing = false;
+    let lastPos = null;
+
+    canvasEl.addEventListener("mousedown", (e) => {
+        isDrawing = true;
+        lastPos = { x: e.offsetX, y: e.offsetY };
+    });
+
+    canvasEl.addEventListener("mouseup", () => {
+        isDrawing = false;
+        lastPos = null;
+    });
+
+    canvasEl.addEventListener("mousemove", (e) => {
+        if (!isDrawing) return;
+
+        const currentPos = { x: e.offsetX, y: e.offsetY };
+
+        // Distance between last and current
+        const dx = currentPos.x - lastPos.x;
+        const dy = currentPos.y - lastPos.y;
+        const distance = Math.hypot(dx, dy);
+        const steps = Math.ceil(distance / 2); // 2px spacing between circles
+
+        for (let i = 0; i < steps; i++) {
+            const t = i / steps;
+            const x = lastPos.x + dx * t;
+            const y = lastPos.y + dy * t;
+
+            const circle = new Circle({ x, y }, 5, { x: 0, y: 0 });
+            // circles.push(circle);
+
+            circle.draw(ctx);
+        }
+
+        lastPos = currentPos;
+    });
+
+
+    // circles.forEach(circle => circle.draw(ctx));
+
+    // const animate = () => {
+    //     requestAnimationFrame(animate);
+    //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //     circles.forEach(circle => circle.update(ctx, canvas));
+    // }
+
+    // animate();
 
 })
+
+
+const setNStoreCanvasSize = (canvasEl) => {
+    const canvasStyle = window.getComputedStyle(canvasEl);
+    const marginLeft = parseInt(canvasStyle.marginLeft, 10);
+    const marginRight = parseInt(canvasStyle.marginRight, 10);
+    const marginTop = parseInt(canvasStyle.marginTop, 10);
+    const marginBottom = parseInt(canvasStyle.marginBottom, 10);
+    const borderLeft = parseInt(canvasStyle.borderLeftWidth, 10);
+    const borderRight = parseInt(canvasStyle.borderRightWidth, 10);
+    const borderTop = parseInt(canvasStyle.borderTopWidth, 10);
+    const borderBottom = parseInt(canvasStyle.borderBottomWidth, 10);
+
+    canvasEl.width = window.innerWidth - marginLeft - marginRight - borderLeft - borderRight;
+    canvasEl.height = window.innerHeight - marginTop - marginBottom - borderTop - borderBottom;
+
+    return {
+        width: canvasEl.width,
+        height: canvasEl.height
+    };
+}
