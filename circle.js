@@ -1,6 +1,6 @@
 "use strict";
 
-export default function Circle(position = { x: 0, y: 0 }, radius = 0, velocity = { x: 1, y: 1 }, clr = "#123456", strokeClr = "#12345600", print = false) {
+export default function Circle(position = { x: 0, y: 0 }, radius = 0, velocity = { x: 1, y: 1 }, clr = "#123456", strokeClr = "#123456", print = false) {
     this.position = position;
     this.radius = radius;
     this.initialRadius = radius;
@@ -23,9 +23,9 @@ Circle.prototype.draw = function (ctx) {
     // ctx.shadowColor = this.clr;
     // ctx.shadowBlur = this.radius / 2;
 
-    ctx.globalAlpha = 1; // 50% transparent
-    ctx.fillStyle = this.clr;
-    ctx.fill();
+    // ctx.globalAlpha = 1; // 50% transparent
+    // ctx.fillStyle = this.clr;
+    // ctx.fill();
 
     ctx.restore();
 
