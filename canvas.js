@@ -11,7 +11,7 @@ window.addEventListener("load", () => {
     window.addEventListener("resize", () => {
         canvas = setNStoreCanvasSize(canvasEl);
     });
-    const ctx = canvasEl.getContext("2d");
+    const ctx = canvasEl.getContext("2d", { willReadFrequently: true });
 
     const circles = [];
 
@@ -26,9 +26,50 @@ window.addEventListener("load", () => {
     let isDrawing = false;
     let lastPos = null;
 
+    // Utility function to check if a color is close to white
+    function isWhite(r, g, b, threshold = 0) {
+        return r >= threshold && g >= threshold && b >= threshold;
+    }
+
     canvasEl.addEventListener("mousedown", (e) => {
         isDrawing = true;
         lastPos = { x: e.offsetX, y: e.offsetY };
+
+        // Optional: draw an initial dot if needed
+        const centerX = lastPos.x;
+        const centerY = lastPos.y;
+        const radius = 4;
+
+        const startX = centerX - radius;
+        const startY = centerY - radius;
+        const diameter = radius * 2;
+
+        const imageData = ctx.getImageData(startX, startY, diameter, diameter);
+        const data = imageData.data;
+
+        for (let j = 0; j < diameter; j++) {
+            for (let i = 0; i < diameter; i++) {
+                const dx = i - radius;
+                const dy = j - radius;
+
+                if (dx * dx + dy * dy <= radius * radius) {
+                    const index = (j * diameter + i) * 4;
+                    const r = data[index];
+                    const g = data[index + 1];
+                    const b = data[index + 2];
+
+                    if (isWhite(r, g, b)) {
+                        data[index] = 18;
+                        data[index + 1] = 52;
+                        data[index + 2] = 86;
+                        data[index + 3] = 128; // fully opaque
+                    }
+                }
+            }
+        }
+
+
+        ctx.putImageData(imageData, startX, startY);
     });
 
     canvasEl.addEventListener("mouseup", () => {
@@ -41,21 +82,49 @@ window.addEventListener("load", () => {
 
         const currentPos = { x: e.offsetX, y: e.offsetY };
 
-        // Distance between last and current
         const dx = currentPos.x - lastPos.x;
         const dy = currentPos.y - lastPos.y;
         const distance = Math.hypot(dx, dy);
-        const steps = Math.ceil(distance / 2); // 2px spacing between circles
+        const steps = Math.ceil(distance / 1); // 1px spacing between updates
 
-        for (let i = 0; i < steps; i++) {
-            const t = i / steps;
+        for (let s = 0; s < steps; s++) {
+            const t = s / steps;
             const x = lastPos.x + dx * t;
             const y = lastPos.y + dy * t;
 
-            const circle = new Circle({ x, y }, 5, { x: 0, y: 0 });
-            // circles.push(circle);
+            const centerX = x;
+            const centerY = y;
+            const radius = 4;
 
-            circle.draw(ctx);
+            const startX = centerX - radius;
+            const startY = centerY - radius;
+            const diameter = radius * 2;
+
+            const imageData = ctx.getImageData(startX, startY, diameter, diameter);
+            const data = imageData.data;
+
+            for (let j = 0; j < diameter; j++) {
+                for (let i = 0; i < diameter; i++) {
+                    const dx = i - radius;
+                    const dy = j - radius;
+
+                    if (dx * dx + dy * dy <= radius * radius) {
+                        const index = (j * diameter + i) * 4;
+                        const r = data[index];
+                        const g = data[index + 1];
+                        const b = data[index + 2];
+
+                        if (isWhite(r, g, b)) {
+                            data[index] = 18;
+                            data[index + 1] = 52;
+                            data[index + 2] = 86;
+                            data[index + 3] = 128; // fully opaque
+                        }
+                    }
+                }
+            }
+
+            ctx.putImageData(imageData, startX, startY);
         }
 
         lastPos = currentPos;

@@ -20,9 +20,9 @@ Circle.prototype.draw = function (ctx) {
 
     ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
 
-    // ctx.shadowColor = this.clr;
-    // ctx.shadowBlur = this.radius / 2;
-
+    ctx.shadowColor = this.clr;
+    ctx.shadowBlur = this.radius / 2;
+    
     // ctx.globalAlpha = 1; // 50% transparent
     // ctx.fillStyle = this.clr;
     // ctx.fill();
