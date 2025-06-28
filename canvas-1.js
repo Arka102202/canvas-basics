@@ -1,6 +1,7 @@
 "use strict";
 
 import Circle from "./circle.js";
+import { getRandomInt } from "./utils.js";
 
 window.addEventListener("load", () => {
 
@@ -12,28 +13,18 @@ window.addEventListener("load", () => {
 
     let circles = [];
 
-    const generateCircle = () => {
-        const radius = getRandomInt(10, 30);
-        const randX = getRandomInt(radius, canvas.width - radius);
-        const randY = getRandomInt(radius, canvas.height - radius);
-
-        const randVelX = getRandomInt(-5, 5);
-        const randVelY = getRandomInt(-5, 5);
-
-        return new Circle({ x: randX, y: randY }, radius, { x: randVelX, y: randVelY }, "#12345600", "#123456", false, canvas);
-    }
-
     const init = (circles) => {
-        for (let i = 0; i < 100; i++) {
-            const circle = generateCircle();
+        let numOfCircles = 50;
+        for (let i = 0; i < numOfCircles; i++) {
+            const circle = Circle.generateCircle(canvas, circles);
             if (Object.keys(circle).length !== 0) {
                 circles.push(circle);
                 circle.draw(ctx)
-                console.log(circle)
-            }
+            } else numOfCircles += 1;
+
+            console.log(numOfCircles);
         }
     }
-
 
     init(circles);
 
@@ -44,9 +35,6 @@ window.addEventListener("load", () => {
 
         init(circles);
     });
-
-
-
 
     let isDrawing = false;
     let lastPos = null;
@@ -70,47 +58,58 @@ window.addEventListener("load", () => {
         const dx = currentPos.x - lastPos.x;
         const dy = currentPos.y - lastPos.y;
         const distance = Math.hypot(dx, dy);
-        // const steps = Math.ceil(distance / 2); // 2px spacing between circles
 
-        // for (let i = 0; i < steps; i++) {
-        //     const t = i / steps;
-        //     const x = lastPos.x + dx * t;
-        //     const y = lastPos.y + dy * t;
-
-        //     const circle = new Circle({ x, y }, 5, { x: 0, y: 0 });
-        //     circles.push(circle);
-        //     circles.forEach(circle => circle.draw(ctx));
-        // }
-
-        const circle = new Circle({ ...currentPos }, getRandomInt(20, 25), { x: Math.abs(dx) ? (-dx / Math.abs(dx)) * getRandomInt(1, 4) : 0, y: Math.abs(dy) ? (-dy / Math.abs(dy)) * getRandomInt(1, 4) : 0 }, "#12345600", "#123456", false, canvas);
-        if (Object.keys(circle).length !== 0) {
-            circles.push(circle);
-
-            console.log(circle)
-            circle.draw(ctx);
-
+        if (dy !== 0 || dx !== 0) {
+            const circle = new Circle({ ...currentPos }, getRandomInt(20, 25), { x: Math.abs(dx) ? (-dx / Math.abs(dx)) * getRandomInt(1, 4) : 0, y: Math.abs(dy) ? (-dy / Math.abs(dy)) * getRandomInt(1, 4) : 0 }, "#12345600", "#123456", false, canvas);
+            if (Object.keys(circle).length !== 0) {
+                circles.push(circle);
+                circle.draw(ctx);
+            }
         }
-        // circles.forEach(circle => circle.draw(ctx));
-
 
         lastPos = currentPos;
     });
 
-
-    // circles.forEach(circle => circle.draw(ctx));
-
     const animate = () => {
         requestAnimationFrame(animate);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        circles.forEach(circle => {
-            // circle.radius -= .5;
-            // if (circle.radius >= 2) circle.update(ctx, canvas);
+        for (let i = 0; i < circles.length; i++) {
+            for (let j = i + 1; j < circles.length; j++) {
+                const c1 = circles[i];
+                const c2 = circles[j];
+                const { distance, dx, dy } = Circle.getDistance(c1.position, c2.position);
+                if (distance <= c1.radius + c2.radius) {
 
+                    Circle.getVelocitiesAfterCollision(c1, c2);
+                    Circle.correctOverlap(c1, c2, distance, dx, dy, canvas);
+                    if (c1.radius === c2.radius || c1.radius > c2.radius) {
+                        if (c1.position.x + c1.radius < canvas.width - 1 &&
+                            c1.position.x - c1.radius > 1 &&
+                            c1.position.y + c1.radius < canvas.height - 1 &&
+                            c1.position.y - c1.radius > 1 &&
+                            c1.radius <= Math.min(canvas.width, canvas.height) / 2)
+                            c1.mass = c1.radius += 1;
+                        c2.mass = c2.radius -= 1;
+                    } else {
+                        if (c2.position.x + c2.radius < canvas.width - 1 &&
+                            c2.position.x - c2.radius > 1 &&
+                            c2.position.y + c2.radius < canvas.height - 1 &&
+                            c2.position.y - c2.radius > 1 &&
+                            c2.radius <= Math.min(canvas.width, canvas.height) / 2)
+                            c2.mass = c2.radius += 1;
+                        c1.mass = c1.radius -= 1;
+                    }
+                }
+            }
+        }
+
+        circles = circles.filter(circle => circle.radius > 0);
+        // Update all circles separately after resolving all collisions
+        circles.forEach(circle => {
             circle.update(ctx, canvas);
         });
 
 
-        circles = circles.filter(circle => circle.radius >= 2);
     }
 
     animate();
@@ -136,11 +135,4 @@ const setNStoreCanvasSize = (canvasEl) => {
         width: canvasEl.width,
         height: canvasEl.height
     };
-}
-
-
-function getRandomInt(min, max) {
-    min = Math.ceil(min);   // Round up to ensure we include the min properly
-    max = Math.floor(max);  // Round down to ensure we include the max properly
-    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
