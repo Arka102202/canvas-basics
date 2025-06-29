@@ -14,7 +14,7 @@ window.addEventListener("load", () => {
     let circles = [];
 
     const init = (circles) => {
-        let numOfCircles = 50;
+        let numOfCircles = 4;
         for (let i = 0; i < numOfCircles; i++) {
             const circle = Circle.generateCircle(canvas, circles);
             if (Object.keys(circle).length !== 0) {
