@@ -21,8 +21,8 @@ window.addEventListener("load", () => {
     let rad = 1;
 
     const init = (particles) => {
-        let numOfParticles = 100;
-        const resolution = 50;
+        let numOfParticles = 50;
+        const resolution = 100;
         let alpha = 0;
         for (let j = 0; j < numOfParticles; j++) {
             const particle = [];
@@ -66,10 +66,10 @@ window.addEventListener("load", () => {
         init(particles);
     });
 
-    // setInterval(() => {
-    //     targetCenter.x = getRandomInt(0, canvas.width);
-    //     targetCenter.y = getRandomInt(0, canvas.height);
-    // }, 1000)
+    setInterval(() => {
+        targetCenter.x = getRandomInt(0, canvas.width);
+        targetCenter.y = getRandomInt(0, canvas.height);
+    }, 1000)
 
     const animate = () => {
         requestAnimationFrame(animate);
@@ -93,7 +93,7 @@ window.addEventListener("load", () => {
         const lerp = 0.005;
         center.x += (targetCenter.x - center.x) * lerp;
         center.y += (targetCenter.y - center.y) * lerp;
-        ctx.fillStyle = "rgba(251, 251, 251, 0.5)"; // Adjust alpha for trail length
+        ctx.fillStyle = "rgba(251, 251, 251, 0.1)"; // Adjust alpha for trail length
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         particles.forEach(particle => {
