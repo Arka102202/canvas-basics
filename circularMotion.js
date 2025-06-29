@@ -11,23 +11,25 @@ window.addEventListener("load", () => {
     const ctx = canvasEl.getContext("2d");
     let canvas = setNStoreCanvasSize(canvasEl, ctx);
 
-    let center = { x: canvas.width / 2, y: canvas.height / 2 };
+    let center = { x: canvas.width / 3, y: canvas.height / 3 };
     let targetCenter = { ...center };
 
     let particles = [];
 
     let isDrawing = false;
 
+    let rad = 1;
+
     const init = (particles) => {
-        let numOfParticles = 10;
-        const resolution = 100;
+        let numOfParticles = 100;
+        const resolution = 50;
         let alpha = 0;
         for (let j = 0; j < numOfParticles; j++) {
             const particle = [];
             particles.push(particle);
-            const radius = getRandomInt(100, 300);
+            const radius = getRandomInt(80, 200);
             let theta = getRandomInt(0, 360);
-            const velocity = 1.5;
+            const velocity = 1;
             const width = getRandomInt(1, 5);
             // const width = 10;
             const clr = getRandomHexColor();
@@ -37,6 +39,20 @@ window.addEventListener("load", () => {
                 eachPart.draw(ctx);
                 particle.push(eachPart);
             }
+        }
+    }
+
+    const init1 = (particles) => {
+        let numOfParticles = 100;
+        for (let j = 0; j < numOfParticles; j++) {
+            const radius = getRandomInt(100, 300);
+            let theta = getRandomInt(0, 360);
+            const velocity = -1;
+            const width = getRandomInt(1, 5);
+            const clr = getRandomHexColor();
+            const particle = new Line(width, clr, 1, radius, center, theta, velocity);
+            particle.draw(ctx);
+            particles.push(particle);
         }
     }
 
@@ -50,20 +66,58 @@ window.addEventListener("load", () => {
         init(particles);
     });
 
+    // setInterval(() => {
+    //     targetCenter.x = getRandomInt(0, canvas.width);
+    //     targetCenter.y = getRandomInt(0, canvas.height);
+    // }, 1000)
+
     const animate = () => {
         requestAnimationFrame(animate);
-        const lerp = 0.05;
+        // const lerp = 0.05;
+        // center.x += (targetCenter.x - center.x) * lerp;
+        // center.y += (targetCenter.y - center.y) * lerp;
+        // rad += 1;
+        // const angle = rad * Math.PI / 180;
+        // const orbitRadius = 100;
+
+        // const canvasCenter = {
+        //     x: canvas.width / 2,
+        //     y: canvas.height / 2
+        // };
+
+        // targetCenter.x = canvasCenter.x + orbitRadius * Math.cos(angle);
+        // targetCenter.y = canvasCenter.y + orbitRadius * Math.sin(angle);
+        
+
+        // 2. Smoothly move center toward targetCenter (lerp)
+        const lerp = 0.005;
         center.x += (targetCenter.x - center.x) * lerp;
         center.y += (targetCenter.y - center.y) * lerp;
-
-        ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; // Adjust alpha for trail length
-ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "rgba(251, 251, 251, 0.5)"; // Adjust alpha for trail length
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         particles.forEach(particle => {
             particle.forEach(el => {
                 if (isDrawing) el.center = { ...center };
                 el.draw(ctx);
             });
+        });
+
+
+    }
+
+    const animate1 = () => {
+        requestAnimationFrame(animate1);
+        const lerp = 0.05;
+        center.x += (targetCenter.x - center.x) * lerp;
+        center.y += (targetCenter.y - center.y) * lerp;
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; // Adjust alpha for trail length
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(particle => {
+            if (isDrawing) particle.center = { ...center };
+            particle.draw(ctx);
         });
 
 
