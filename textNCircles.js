@@ -1,6 +1,7 @@
 "use strict";
 
 import Alpha_A from "./alpha-A.js";
+import Alpha_J from "./alpha-J.js";
 import CircleInsideText from "./CircleInsideText.js";
 import { getRandomInt, getRandomIntExcludingRange } from "./utils.js";
 
@@ -11,9 +12,12 @@ window.addEventListener("load", () => {
     const ctx = canvasEl.getContext("2d");
     let canvas = setNStoreCanvasSize(canvasEl, ctx);
 
-    const alphaSize = { width: 200, height: 300 };
+    const alphaJSize = { width: 200, height: 320 };
+    const alphaASize = { width: 200, height: 300 };
 
-    const alphaA = new Alpha_A({ x: canvas.width / 2 - alphaSize.width / 2, y: canvas.height / 2 - alphaSize.height / 2 }, { width: 200, height: 300 });
+    const alphaJ = new Alpha_J({ x: canvas.width / 2 - alphaJSize.width, y: canvas.height / 2 - alphaJSize.height / 2 + 10 }, alphaJSize);
+
+    const alphaA = new Alpha_A({ x: canvas.width / 2 , y: canvas.height / 2 - alphaASize.height / 2 }, alphaASize);
 
     const particles = [];
     const pathTypes = ["arc"];
@@ -32,6 +36,23 @@ window.addEventListener("load", () => {
         const pathType = pathTypes[getRandomInt(0, pathTypes.length)];
 
         if (alphaA.isInside({ x, y }, radius)) {
+            const particle = new CircleInsideText({ x: sx, y: sy }, { x, y }, radius, { x: 0, y: 0 }, pathType, "#123456");
+            particle.draw(ctx);
+            particles.push(particle);
+        }
+    }
+
+    for (let i = 0; i < numOfParticles; i++) {
+        const x = getRandomInt(alphaJ.x1, alphaJ.x2);
+        const y = getRandomInt(alphaJ.y1, alphaJ.y2);
+
+        const sx = getRandomInt(0, canvas.width);
+        const sy = getRandomInt(0, canvas.height);
+
+        const radius = getRandomInt(1, 2);
+        const pathType = pathTypes[getRandomInt(0, pathTypes.length)];
+
+        if (alphaJ.isInside({ x, y }, radius)) {
             const particle = new CircleInsideText({ x: sx, y: sy }, { x, y }, radius, { x: 0, y: 0 }, pathType, "#123456");
             particle.draw(ctx);
             particles.push(particle);
